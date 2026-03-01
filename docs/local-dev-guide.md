@@ -29,7 +29,7 @@ That's it — all services are back up.
 | **API Server** | http://localhost:3000 | — | — |
 | **Swagger Docs** | http://localhost:3000/swagger | — | — |
 | **Health Check** | http://localhost:3000/health | — | — |
-| **pgAdmin** (PostgreSQL GUI) | http://localhost:5050 | `admin@trading.dev` | `admin` |
+| **pgAdmin** (PostgreSQL GUI) | http://localhost:5050 | `admin@trading.dev` | `admin` ← this is the password |
 | **RedisInsight** (DragonflyDB GUI) | http://localhost:5540 | — | — |
 | **PostgreSQL** (direct) | `localhost:5432` | `trading_user` | `trading_pass` |
 | **DragonflyDB** (direct) | `localhost:6379` | — | no password |
@@ -43,7 +43,7 @@ That's it — all services are back up.
 docker compose -f docker/docker-compose.yml up -d
 
 # Start only one specific service
-docker compose -f docker/docker-compose.yml up -d timescaledb
+docker compose -f docker/docker-compose.yml up -d postgres
 docker compose -f docker/docker-compose.yml up -d dragonflydb
 docker compose -f docker/docker-compose.yml up -d pgadmin
 docker compose -f docker/docker-compose.yml up -d redisinsight
@@ -58,13 +58,13 @@ docker compose -f docker/docker-compose.yml down -v
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 # See logs for a specific container
-docker logs trading_timescaledb
+docker logs trading_postgres
 docker logs trading_dragonflydb
 docker logs trading_pgadmin
 docker logs trading_redisinsight
 
 # Follow logs in real time (Ctrl+C to stop)
-docker logs -f trading_timescaledb
+docker logs -f trading_postgres
 ```
 
 ---
@@ -89,10 +89,10 @@ postgres://trading_user:trading_pass@localhost:5432/trading_db
 
 ```powershell
 # Open an interactive psql shell
-docker exec -it trading_timescaledb psql -U trading_user -d trading_db
+docker exec -it trading_postgres psql -U trading_user -d trading_db
 
 # Run a single SQL command without entering the shell
-docker exec trading_timescaledb psql -U trading_user -d trading_db -c "YOUR SQL HERE"
+docker exec trading_postgres psql -U trading_user -d trading_db -c "YOUR SQL HERE"
 ```
 
 ### Useful psql commands (run these inside the psql shell)
@@ -151,11 +151,13 @@ ORDER BY bucket DESC;
 ### pgAdmin GUI — how to connect (first time only)
 
 1. Open http://localhost:5050
-2. Login: `admin@trading.dev` / `admin`
+2. Login with these credentials:
+   - **Email:** `admin@trading.dev`
+   - **Password:** `admin`
 3. Click **Add New Server** (on the Welcome dashboard)
-4. **General tab** → Name: `trading-timescaledb`
+4. **General tab** → Name: `trading-postgres`
 5. **Connection tab** → fill in:
-   - Host: `timescaledb`  ← use the Docker service name, NOT localhost
+   - Host: `postgres`  ← use the Docker service name, NOT localhost
    - Port: `5432`
    - Maintenance database: `trading_db`
    - Username: `trading_user`
@@ -163,9 +165,9 @@ ORDER BY bucket DESC;
    - Check **Save password**
 6. Click **Save**
 
-> The host must be `timescaledb` (the Docker container name) because pgAdmin
+> The host must be `postgres` (the Docker service name) because pgAdmin
 > itself runs inside Docker. From inside Docker, `localhost` means the pgAdmin
-> container itself — not your PC. The service name `timescaledb` resolves via
+> container itself — not your PC. The service name `postgres` resolves via
 > Docker's internal DNS.
 
 ### pgAdmin GUI — browse tables
@@ -173,15 +175,23 @@ ORDER BY bucket DESC;
 Left panel tree:
 ```
 Servers
-  └─ trading-timescaledb
+  └─ trading-postgres
        └─ Databases
             └─ trading_db
                  └─ Schemas
                       └─ public
                            └─ Tables
-                                ├─ trades   ← right-click → View/Edit Data
-                                └─ users    ← right-click → View/Edit Data
+                                ├─ users
+                                ├─ accounts
+                                ├─ ledger
+                                ├─ orders
+                                ├─ trades
+                                ├─ positions
+                                ├─ holdings
+                                ├─ transactions
+                                └─ margins
 ```
+Right-click any table → **View/Edit Data** to browse rows.
 
 To run SQL: **Tools → Query Tool** (or `Alt+Shift+Q`)
 
@@ -284,7 +294,6 @@ bun run start
 bun run db:generate
 
 # Apply all pending migrations to the database
-# (also enables TimescaleDB extension + converts trades to hypertable)
 bun run db:migrate
 
 # Push schema directly to the DB without generating migration files
@@ -311,7 +320,7 @@ Use this if the database gets into a broken state or you want a clean slate:
 docker compose -f docker/docker-compose.yml down -v
 
 # 2. Delete old migration files
-Remove-Item -Recurse -Force drizzle
+Remove-Item -Recurse -Force drizzle/*
 
 # 3. Regenerate migrations from your schema files
 bun run db:generate
@@ -319,7 +328,7 @@ bun run db:generate
 # 4. Start containers fresh
 docker compose -f docker/docker-compose.yml up -d
 
-# 5. Wait ~10 seconds for TimescaleDB to be ready, then run migrations
+# 5. Wait ~10 seconds for PostgreSQL to be ready, then run migrations
 bun run db:migrate
 
 # 6. Start the dev server
@@ -335,7 +344,7 @@ bun run dev
 Invoke-RestMethod http://localhost:3000/health | ConvertTo-Json
 
 # PostgreSQL - list tables
-docker exec trading_timescaledb psql -U trading_user -d trading_db -c "\dt"
+docker exec trading_postgres psql -U trading_user -d trading_db -c "\dt"
 
 # DragonflyDB - ping
 docker exec trading_dragonflydb redis-cli PING
