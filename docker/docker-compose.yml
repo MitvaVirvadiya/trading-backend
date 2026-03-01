@@ -1,0 +1,126 @@
+# ==============================================================================
+# docker-compose.yml
+#
+# Spins up four services needed for local development:
+#   1. timescaledb   — PostgreSQL 16 with TimescaleDB extension
+#   2. dragonflydb   — Redis-compatible in-memory store (faster than Redis)
+#   3. pgadmin       — Optional web UI to inspect your PostgreSQL database
+#   4. redisinsight  — Web UI to inspect DragonflyDB (Redis GUI)
+#
+# Usage:
+#   docker compose -f docker/docker-compose.yml up -d   # start all services
+#   docker compose -f docker/docker-compose.yml down    # stop all services
+#   docker compose -f docker/docker-compose.yml down -v # stop + wipe volumes
+# ==============================================================================
+
+services:
+
+  # PostgreSQL — plain PostgreSQL 16 (no TimescaleDB needed)
+  postgres:
+    image: postgres:16-alpine
+    container_name: trading_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-trading_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trading_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-trading_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trading_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DragonflyDB — Drop-in Redis replacement (25x faster throughput)
+  #
+  # What is DragonflyDB?
+  #   A modern in-memory data store that speaks the Redis protocol, so any
+  #   Redis client (like ioredis) connects to it without changes.
+  #   It uses multi-threading to saturate all CPU cores whereas Redis is
+  #   single-threaded. Great for caching, pub/sub, rate limiting, and sessions.
+  #
+  # In this project we use it to cache:
+  #   • API responses  (avoid hammering the DB on every request)
+  #   • Rate-limit counters
+  #   • Session tokens / JWT deny-lists
+  # ─────────────────────────────────────────────────────────────────────────────
+  dragonflydb:
+    # DragonflyDB is only published on GitHub Container Registry (ghcr.io),
+    # not on Docker Hub. This is the official public image.
+    image: ghcr.io/dragonflydb/dragonfly:latest
+    container_name: trading_dragonflydb
+    restart: unless-stopped
+    ports:
+      - "6379:6379"    # Same port as Redis — clients don't need reconfiguring
+    ulimits:
+      memlock: -1      # DragonflyDB recommends unlimited memory lock
+    volumes:
+      - dragonflydb_data:/data
+    healthcheck:
+      # DragonflyDB speaks Redis protocol. `dragonfly --requirepass` is off by
+      # default so we can ping without auth. nc (netcat) is available in the
+      # container and is the simplest way to verify the port is open.
+      test: ["CMD", "nc", "-z", "localhost", "6379"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # pgAdmin — Web-based GUI for PostgreSQL / TimescaleDB
+  #
+  # Access at: http://localhost:5050
+  # Login:     admin@trading.dev / admin
+  # Server:    host=timescaledb  port=5432  db=trading_db  user=trading_user
+  # ─────────────────────────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: trading_pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@trading.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # RedisInsight — Official GUI for Redis-protocol databases (inc. DragonflyDB)
+  #
+  # What is RedisInsight?
+  #   A free browser-based GUI that works with any Redis-compatible store.
+  #   Since DragonflyDB speaks Redis protocol, RedisInsight connects with
+  #   zero config. Features:
+  #     • Browse all keys and their types/values in real time
+  #     • Run commands interactively via built-in CLI
+  #     • Monitor pub/sub channels and slow logs
+  #
+  # Access at: http://localhost:5540
+  # Add DB:    HOST = dragonflydb   PORT = 6379   (no password by default)
+  # ─────────────────────────────────────────────────────────────────────────────
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: trading_redisinsight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      dragonflydb:
+        condition: service_healthy
+
+# Persistent named volumes — Docker manages storage on your host machine.
+volumes:
+  postgres_data:
+  dragonflydb_data:
+  pgadmin_data:
+  redisinsight_data:
+

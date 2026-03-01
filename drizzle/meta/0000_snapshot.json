@@ -1,0 +1,1127 @@
+{
+  "id": "35b17da1-5d58-4fab-95c0-a436dda2767a",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.accounts": {
+      "name": "accounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "balance": {
+          "name": "balance",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "blocked_balance": {
+          "name": "blocked_balance",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "accounts_user_id_users_id_fk": {
+          "name": "accounts_user_id_users_id_fk",
+          "tableFrom": "accounts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ledger": {
+      "name": "ledger",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "balance_after": {
+          "name": "balance_after",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reference_id": {
+          "name": "reference_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reference_type": {
+          "name": "reference_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ledger_user_id_users_id_fk": {
+          "name": "ledger_user_id_users_id_fk",
+          "tableFrom": "ledger",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ledger_account_id_accounts_id_fk": {
+          "name": "ledger_account_id_accounts_id_fk",
+          "tableFrom": "ledger",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.orders": {
+      "name": "orders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "symbol": {
+          "name": "symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_name": {
+          "name": "instrument_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isin": {
+          "name": "isin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange_token": {
+          "name": "exchange_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange": {
+          "name": "exchange",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "segment": {
+          "name": "segment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_type": {
+          "name": "instrument_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiry_date": {
+          "name": "expiry_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "strike_price": {
+          "name": "strike_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "option_type": {
+          "name": "option_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lot_size": {
+          "name": "lot_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "order_type": {
+          "name": "order_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "side": {
+          "name": "side",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "product": {
+          "name": "product",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "price": {
+          "name": "price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trigger_price": {
+          "name": "trigger_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "filled_quantity": {
+          "name": "filled_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "average_price": {
+          "name": "average_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'pending'"
+        },
+        "rejection_reason": {
+          "name": "rejection_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "validity": {
+          "name": "validity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'day'"
+        },
+        "tag": {
+          "name": "tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "orders_user_id_users_id_fk": {
+          "name": "orders_user_id_users_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.trades": {
+      "name": "trades",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "order_id": {
+          "name": "order_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "symbol": {
+          "name": "symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_name": {
+          "name": "instrument_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isin": {
+          "name": "isin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange_token": {
+          "name": "exchange_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange": {
+          "name": "exchange",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "segment": {
+          "name": "segment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_type": {
+          "name": "instrument_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiry_date": {
+          "name": "expiry_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "strike_price": {
+          "name": "strike_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "option_type": {
+          "name": "option_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lot_size": {
+          "name": "lot_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "side": {
+          "name": "side",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "product": {
+          "name": "product",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "price": {
+          "name": "price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "charges": {
+          "name": "charges",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "trade_date": {
+          "name": "trade_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "settlement_date": {
+          "name": "settlement_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "trades_order_id_orders_id_fk": {
+          "name": "trades_order_id_orders_id_fk",
+          "tableFrom": "trades",
+          "tableTo": "orders",
+          "columnsFrom": [
+            "order_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "trades_user_id_users_id_fk": {
+          "name": "trades_user_id_users_id_fk",
+          "tableFrom": "trades",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.positions": {
+      "name": "positions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "symbol": {
+          "name": "symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_name": {
+          "name": "instrument_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isin": {
+          "name": "isin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange_token": {
+          "name": "exchange_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange": {
+          "name": "exchange",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "segment": {
+          "name": "segment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_type": {
+          "name": "instrument_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expiry_date": {
+          "name": "expiry_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "strike_price": {
+          "name": "strike_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "option_type": {
+          "name": "option_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lot_size": {
+          "name": "lot_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "product": {
+          "name": "product",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "net_quantity": {
+          "name": "net_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "buy_quantity": {
+          "name": "buy_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "sell_quantity": {
+          "name": "sell_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "buy_avg_price": {
+          "name": "buy_avg_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "sell_avg_price": {
+          "name": "sell_avg_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "last_price": {
+          "name": "last_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "realized_pnl": {
+          "name": "realized_pnl",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "unrealized_pnl": {
+          "name": "unrealized_pnl",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "pnl": {
+          "name": "pnl",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "is_open": {
+          "name": "is_open",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "trading_date": {
+          "name": "trading_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "positions_user_id_users_id_fk": {
+          "name": "positions_user_id_users_id_fk",
+          "tableFrom": "positions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.holdings": {
+      "name": "holdings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "symbol": {
+          "name": "symbol",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instrument_name": {
+          "name": "instrument_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isin": {
+          "name": "isin",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange_token": {
+          "name": "exchange_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange": {
+          "name": "exchange",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "average_price": {
+          "name": "average_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_price": {
+          "name": "last_price",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "pnl": {
+          "name": "pnl",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "pnl_percent": {
+          "name": "pnl_percent",
+          "type": "numeric(10, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "holdings_user_id_users_id_fk": {
+          "name": "holdings_user_id_users_id_fk",
+          "tableFrom": "holdings",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.transactions": {
+      "name": "transactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'pending'"
+        },
+        "reference_number": {
+          "name": "reference_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "transactions_user_id_users_id_fk": {
+          "name": "transactions_user_id_users_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "transactions_account_id_accounts_id_fk": {
+          "name": "transactions_account_id_accounts_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "transactions_reference_number_unique": {
+          "name": "transactions_reference_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "reference_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.margins": {
+      "name": "margins",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "segment": {
+          "name": "segment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "available_margin": {
+          "name": "available_margin",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "used_margin": {
+          "name": "used_margin",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "total_margin": {
+          "name": "total_margin",
+          "type": "numeric(20, 4)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "margins_user_id_users_id_fk": {
+          "name": "margins_user_id_users_id_fk",
+          "tableFrom": "margins",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
